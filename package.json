@@ -1,0 +1,35 @@
+{
+  "name": "translation-leo",
+  "version": "0.0.2",
+  "description": "translation",
+  "main": "dist/main.js",
+  "bin": {
+    "translate": "dist/cli.js"
+  },
+  "files": [
+    "dist/**/*.js"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "ts-node-dev src/main.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LeoWangJ/translation.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LeoWangJ/translation/issues"
+  },
+  "homepage": "https://github.com/LeoWangJ/translation#readme",
+  "dependencies": {
+    "@vitalets/google-translate-api": "github:vitalets/google-translate-api",
+    "commander": "^4.0.1",
+    "google-translate-api": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/google-translate-api": "^2.3.0",
+    "@types/node": "^12.12.14"
+  }
+}
