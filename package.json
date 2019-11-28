@@ -26,10 +26,12 @@
   "dependencies": {
     "@vitalets/google-translate-api": "github:vitalets/google-translate-api",
     "commander": "^4.0.1",
-    "google-translate-api": "^2.3.0"
+    "google-translate-api": "^2.3.0",
+    "inquirer": "^7.0.0"
   },
   "devDependencies": {
     "@types/google-translate-api": "^2.3.0",
+    "@types/inquirer": "^6.5.0",
     "@types/node": "^12.12.14"
   }
 }
