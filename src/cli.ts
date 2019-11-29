@@ -2,6 +2,7 @@
 import * as commander from 'commander'
 import { translate } from './main'
 import inquirer from 'inquirer'
+import { db } from './db'
 const program = new commander.Command()
 const pkg = require('../package.json')
 let to: string, from: string
@@ -10,14 +11,16 @@ program
 program
     .command('fy')
     .description('直接使用翻譯功能, 必填一個單字')
-    .action((...args) => {
+    .action(async (...args) => {
         if (args.length == 1) {
             console.log('請輸入至少一個單字')
             return
         }
+
+        let languageObj:any= await db.read()
+
         let word: string = args.slice(-1)[0].join(' ')
-        console.log(to, from)
-        translate(word, to, from)
+        translate(word, languageObj.from, languageObj.to)
     })
 // .name('translate')
 // .usage('<Word>')
@@ -28,6 +31,17 @@ program
 // })
 program.parse(process.argv)
 
+type languageMapType = {
+    [key:string]:string;
+    'zh-TW':string;
+    'zh-CN':string;
+    'en': string;
+}
+const languageMap:languageMapType = {
+    'zh-TW':'繁體中文',
+    'zh-CN':'簡體中文',
+    'en': '英文'
+}
 if (process.argv.length === 2) {
     inquirer
         .prompt([
@@ -36,60 +50,56 @@ if (process.argv.length === 2) {
                 name: 'index',
                 message: '請選擇您要的操作',
                 choices: [
+                    {name:'查看當前翻譯語言', value:'-3'},
                     { name: '修改翻譯語言', value: '-2' },
                     { name: '退出', value: '-1' }
                 ]
             }
-        ]).then((answer: { index: string }) => {
-            console.log(answer)
+        ]).then(async (answer: { index: string }) => {
             let index: number = parseInt(answer.index)
             if (index === -2) {
+                let languageObj = {
+                    to:'en',
+                    from: 'zh-TW'
+                }
                 inquirer
                     .prompt([
                         {
                             type: 'list',
-                            name: 'to',
+                            name: 'from',
                             message: '請選擇您輸入的語言',
                             choices: [
-                                { name: '簡體中文', value: '1' },
-                                { name: '繁體中文', value: '2' },
-                                { name: '英文', value: '3' },
+                                { name: '簡體中文', value: 'zh-CN' },
+                                { name: '繁體中文', value: 'zh-TW' },
+                                { name: '英文', value: 'en' },
                             ]
                         }
-                    ]).then((answer1: { to: string }) => {
-                        let index: number = parseInt(answer1.to)
-                        if (index === 1) {
-                            to = 'zh-CN'
-                        } else if (index === 2) {
-                            to = 'zh-TW'
-                        } else if (index === 3) {
-                            to = 'en'
-                        }
+                    ]).then((answer1: { from: string }) => {
+                        languageObj.from = answer1.from
                         inquirer
                             .prompt([
                                 {
                                     type: 'list',
-                                    name: 'from',
+                                    name: 'to',
                                     message: '請選擇您將要翻譯的語言',
                                     choices: [
-                                        { name: '簡體中文', value: '1' },
-                                        { name: '繁體中文', value: '2' },
-                                        { name: '英文', value: '3' },
+                                        { name: '簡體中文', value: 'zh-CN' },
+                                        { name: '繁體中文', value: 'zh-TW' },
+                                        { name: '英文', value: 'en' },
                                     ]
                                 }
-                            ]).then((answer2: { from: string }) => {
-                                let index: number = parseInt(answer2.from)
-                                console.log(index)
-                                if (index === 1) {
-                                    from = 'zh-CN'
-                                } else if (index === 2) {
-                                    from = 'zh-TW'
-                                } else if (index === 3) {
-                                    from = 'en'
-                                }
+                            ]).then(async (answer2: { to: string }) => {
+                                languageObj.to = answer2.to
+                                await db.write(languageObj)
+                                console.log('編輯成功！')
+                                
                             })
 
                     })
+            } else if(index === -3){
+                let data:any= await db.read()
+                console.log(`輸入語言: ${languageMap[data.from]} , 輸出語言: ${languageMap[data.to]}`)
+                process.exit(1)
             }
         })
 }
